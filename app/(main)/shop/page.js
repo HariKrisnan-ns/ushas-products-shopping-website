@@ -1,9 +1,9 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
-export default function ShopPage() {
+function ShopPage() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -44,6 +44,7 @@ export default function ShopPage() {
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2800) }
 
   const addToCart = (p) => {
+    if (typeof window === 'undefined') return  // ← add this guard
     const saved = localStorage.getItem('ushas-cart')
     const cart = saved ? JSON.parse(saved) : []
     const existing = cart.find(i => i.id === p.id)
@@ -53,7 +54,6 @@ export default function ShopPage() {
     localStorage.setItem('ushas-cart', JSON.stringify(updated))
     showToast(`🛒 ${p.name} added to cart!`)
   }
-
   const activeCount = activeFilters.length
 
   return (
@@ -568,7 +568,7 @@ export default function ShopPage() {
           {/* Product Grid */}
           {loading ? (
             <div className="prod-grid">
-              {[1,2,3,4,5,6].map(i => (
+              {[1, 2, 3, 4, 5, 6].map(i => (
                 <div key={i} className="skel-card">
                   <div className="skel skel-img" />
                   <div className="skel-body">
@@ -737,5 +737,26 @@ function SidebarContent({ activeFilters, toggleFilter, sort, setSort, setActiveF
         </div>
       </div>
     </>
+  )
+}
+
+function ShopFallback() {
+  return (
+    <div style={{
+      minHeight: '60vh', display: 'flex',
+      alignItems: 'center', justifyContent: 'center',
+      fontFamily: 'Nunito,sans-serif', color: '#7A5C3A',
+      fontSize: '16px', fontWeight: 600, background: '#FDFAF3'
+    }}>
+      🌿 Loading...
+    </div>
+  )
+}
+
+export default function ShopPageWrapper() {
+  return (
+    <Suspense fallback={<ShopFallback />}>
+      <ShopPage />
+    </Suspense>
   )
 }
