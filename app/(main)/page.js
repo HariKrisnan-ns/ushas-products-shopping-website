@@ -14,7 +14,8 @@ export default function HomePage() {
   useEffect(() => {
     fetch('/api/products')
       .then(res => res.json())
-      .then(data => { setProducts(data); setLoading(false) })
+      .then(data => { setProducts(Array.isArray(data) ? data : []); setLoading(false) })
+      .catch(() => { setProducts([]); setLoading(false) })
 
     fetch('/api/content')
       .then(res => res.json())
@@ -25,6 +26,7 @@ export default function HomePage() {
           setTimeout(() => setShowPopup(true), 2500)
         }
       })
+      .catch(() => {})
   }, [])
 
   // Intersection observer for scroll animations
@@ -1043,7 +1045,7 @@ export default function HomePage() {
       {toast && <div className="toast">{toast}</div>}
 
       {/* Scroll animation handler */}
-      <ScrollAnimator />
+      <ScrollAnimator key={String(loading)} />
     </>
   )
 }
