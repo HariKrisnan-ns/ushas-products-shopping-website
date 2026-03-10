@@ -7,6 +7,7 @@ export default function ProfilePage() {
   const { isSignedIn, user } = useUser()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [apiError, setApiError] = useState(null)
   const [activeTab, setActiveTab] = useState('orders')
 
   useEffect(() => {
@@ -16,14 +17,24 @@ export default function ProfilePage() {
     )
     document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => observer.observe(el))
     return () => observer.disconnect()
-  }, [])
+  }, [orders, activeTab]) // re-run when orders load or tab changes
 
   useEffect(() => {
     if (!isSignedIn) { setLoading(false); return }
     fetch('/api/orders')
       .then(res => res.json())
-      .then(data => { setOrders(data); setLoading(false) })
-      .catch(() => setLoading(false))
+      .then(data => {
+        // API might return an error object instead of array
+        if (Array.isArray(data)) {
+          setOrders(data)
+        } else {
+          console.error('Orders API error:', data)
+          setApiError(data?.error || 'Unknown error from API')
+          setOrders([])
+        }
+        setLoading(false)
+      })
+      .catch(err => { console.error('Orders fetch failed:', err); setApiError(err.message); setLoading(false) })
   }, [isSignedIn])
 
   const statusStyle = (status) => {
@@ -155,7 +166,7 @@ export default function ProfilePage() {
 
           {/* ── ORDERS TAB ── */}
           {activeTab === 'orders' && (
-            <div className="reveal-right">
+            <div>
               <div className="pf-content-head">
                 <h2 className="pf-content-title">My <span className="gold">Orders</span></h2>
                 <p className="pf-content-sub">Track and manage all your past and current orders.</p>
@@ -166,6 +177,37 @@ export default function ProfilePage() {
                   <div className="pf-loading-spinner" />
                   <p>Loading your orders…</p>
                 </div>
+              ) : apiError ? (
+                <div style={{
+                  background: '#FADBD8', border: '1.5px solid var(--red)',
+                  borderRadius: 16, padding: '28px 24px', textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: 40, marginBottom: 12 }}>⚠️</div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--red)', marginBottom: 8 }}>
+                    Could not load orders
+                  </div>
+                  <div style={{
+                    fontSize: 13, color: 'var(--muted)', marginBottom: 20,
+                    background: '#fff', borderRadius: 8, padding: '10px 16px',
+                    fontFamily: 'monospace', wordBreak: 'break-all'
+                  }}>
+                    API Error: {apiError}
+                  </div>
+                  <button
+                    onClick={() => { setApiError(null); setLoading(true);
+                      fetch('/api/orders').then(r => r.json()).then(d => {
+                        if (Array.isArray(d)) setOrders(d)
+                        else setApiError(d?.error || 'Unknown error')
+                        setLoading(false)
+                      }).catch(e => { setApiError(e.message); setLoading(false) })
+                    }}
+                    style={{
+                      padding: '10px 24px', background: 'var(--green-m)', color: '#fff',
+                      border: 'none', borderRadius: 10, fontFamily: 'Nunito,sans-serif',
+                      fontSize: 14, fontWeight: 800, cursor: 'pointer'
+                    }}
+                  >🔄 Retry</button>
+                </div>
               ) : orders.length === 0 ? (
                 <div className="pf-empty">
                   <div className="pf-empty-icon">📦</div>
@@ -175,7 +217,7 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 orders.map((order, i) => (
-                  <div key={order.id} className={`pf-order-card reveal d${(i % 3) + 1}`}>
+                  <div key={order.id} className="pf-order-card">
                     <div className="pf-order-top">
                       <div>
                         <div className="pf-order-id">{order.orderNumber}</div>
@@ -198,7 +240,7 @@ export default function ProfilePage() {
                         {order.status === 'processing' && (
                           <button className="pf-order-action danger">Cancel</button>
                         )}
-                        <button className="pf-order-action">View Details →</button>
+                        <Link href={`/orders/${order.id}`} className="pf-order-action" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Track Order →</Link>
                       </div>
                     </div>
                   </div>

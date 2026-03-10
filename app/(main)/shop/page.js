@@ -9,6 +9,7 @@ function ShopPage() {
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState('popular')
   const [activeFilters, setActiveFilters] = useState([])
+  const [priceRange, setPriceRange] = useState([0, 1000])
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [toast, setToast] = useState(null)
   const searchParams = useSearchParams()
@@ -30,10 +31,12 @@ function ShopPage() {
         if (sort === 'price-low') sorted.sort((a, b) => a.price - b.price)
         if (sort === 'price-high') sorted.sort((a, b) => b.price - a.price)
         if (sort === 'rating') sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0))
+        // Apply price range filter client-side
+        sorted = sorted.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1])
         setProducts(sorted)
         setLoading(false)
       })
-  }, [search, activeFilters, sort])
+  }, [search, activeFilters, sort, priceRange])
 
   const toggleFilter = (filter) => {
     setActiveFilters(prev =>
@@ -507,6 +510,8 @@ function ShopPage() {
             sort={sort}
             setSort={setSort}
             setActiveFilters={setActiveFilters}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
           />
         </div>
 
@@ -652,6 +657,8 @@ function ShopPage() {
           sort={sort}
           setSort={setSort}
           setActiveFilters={setActiveFilters}
+          priceRange={priceRange}
+          setPriceRange={setPriceRange}
         />
       </div>
 
@@ -660,8 +667,20 @@ function ShopPage() {
   )
 }
 
-// Reusable sidebar content used in both desktop and mobile drawer
-function SidebarContent({ activeFilters, toggleFilter, sort, setSort, setActiveFilters }) {
+function SidebarContent({ activeFilters, toggleFilter, sort, setSort, setActiveFilters, priceRange, setPriceRange }) {
+  const MIN = 0
+  const MAX = 1000
+
+  const handleMinChange = (e) => {
+    const val = Math.min(Number(e.target.value), priceRange[1] - 50)
+    setPriceRange([val, priceRange[1]])
+  }
+  const handleMaxChange = (e) => {
+    const val = Math.max(Number(e.target.value), priceRange[0] + 50)
+    setPriceRange([priceRange[0], val])
+  }
+  const isPriceFiltered = priceRange[0] > MIN || priceRange[1] < MAX
+
   return (
     <>
       {/* Categories */}
@@ -689,6 +708,116 @@ function SidebarContent({ activeFilters, toggleFilter, sort, setSort, setActiveF
               <span>{ic} {cat}</span>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Price Range */}
+      <div className="filter-card">
+        <div className="filter-card-head">
+          <div className="filter-card-title"><span>₹</span> Price Range</div>
+          {isPriceFiltered && (
+            <button className="filter-clear" onClick={() => setPriceRange([MIN, MAX])}>Reset</button>
+          )}
+        </div>
+        <div className="filter-card-body" style={{ padding: '16px 16px 12px' }}>
+          {/* Price display */}
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            marginBottom: 14
+          }}>
+            <span style={{
+              background: 'var(--green-pl)', color: 'var(--green-m)',
+              fontSize: 13, fontWeight: 800, padding: '4px 12px', borderRadius: 8
+            }}>₹{priceRange[0]}</span>
+            <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600 }}>to</span>
+            <span style={{
+              background: 'var(--green-pl)', color: 'var(--green-m)',
+              fontSize: 13, fontWeight: 800, padding: '4px 12px', borderRadius: 8
+            }}>₹{priceRange[1] >= MAX ? `${MAX}+` : priceRange[1]}</span>
+          </div>
+
+          {/* Dual range sliders */}
+          <div style={{ position: 'relative', height: 28, marginBottom: 4 }}>
+            {/* Track background */}
+            <div style={{
+              position: 'absolute', top: '50%', transform: 'translateY(-50%)',
+              left: 0, right: 0, height: 4, background: 'var(--cream3)',
+              borderRadius: 4, pointerEvents: 'none'
+            }} />
+            {/* Track fill */}
+            <div style={{
+              position: 'absolute', top: '50%', transform: 'translateY(-50%)',
+              left: `${((priceRange[0] - MIN) / (MAX - MIN)) * 100}%`,
+              right: `${((MAX - priceRange[1]) / (MAX - MIN)) * 100}%`,
+              height: 4, background: 'var(--green-m)',
+              borderRadius: 4, pointerEvents: 'none'
+            }} />
+            {/* Min slider */}
+            <input
+              type="range" min={MIN} max={MAX} step={50}
+              value={priceRange[0]}
+              onChange={handleMinChange}
+              style={{
+                position: 'absolute', width: '100%', height: '100%',
+                opacity: 0, cursor: 'pointer', margin: 0,
+                WebkitAppearance: 'none', pointerEvents: 'all'
+              }}
+            />
+            {/* Max slider */}
+            <input
+              type="range" min={MIN} max={MAX} step={50}
+              value={priceRange[1]}
+              onChange={handleMaxChange}
+              style={{
+                position: 'absolute', width: '100%', height: '100%',
+                opacity: 0, cursor: 'pointer', margin: 0,
+                WebkitAppearance: 'none', pointerEvents: 'all'
+              }}
+            />
+            {/* Visual thumb - min */}
+            <div style={{
+              position: 'absolute', top: '50%', transform: 'translate(-50%, -50%)',
+              left: `${((priceRange[0] - MIN) / (MAX - MIN)) * 100}%`,
+              width: 18, height: 18, borderRadius: '50%',
+              background: '#fff', border: '2.5px solid var(--green-m)',
+              boxShadow: '0 2px 6px rgba(45,90,39,0.2)',
+              pointerEvents: 'none', zIndex: 1
+            }} />
+            {/* Visual thumb - max */}
+            <div style={{
+              position: 'absolute', top: '50%', transform: 'translate(-50%, -50%)',
+              left: `${((priceRange[1] - MIN) / (MAX - MIN)) * 100}%`,
+              width: 18, height: 18, borderRadius: '50%',
+              background: '#fff', border: '2.5px solid var(--green-m)',
+              boxShadow: '0 2px 6px rgba(45,90,39,0.2)',
+              pointerEvents: 'none', zIndex: 1
+            }} />
+          </div>
+
+          {/* Quick presets */}
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
+            {[
+              ['Under ₹100', [0, 100]],
+              ['₹100–₹300', [100, 300]],
+              ['₹300+', [300, 1000]],
+            ].map(([label, range]) => {
+              const active = priceRange[0] === range[0] && priceRange[1] === range[1]
+              return (
+                <button
+                  key={label}
+                  onClick={() => setPriceRange(range)}
+                  style={{
+                    padding: '4px 10px', borderRadius: 20, fontSize: 11.5,
+                    fontWeight: 700, cursor: 'pointer', border: 'none',
+                    fontFamily: 'Nunito, sans-serif',
+                    background: active ? 'var(--green-m)' : 'var(--cream2)',
+                    color: active ? '#fff' : 'var(--muted)',
+                    transition: 'all 0.15s'
+                  }}
+                >{label}</button>
+              )
+            })}
+          </div>
         </div>
       </div>
 

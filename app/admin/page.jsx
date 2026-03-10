@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useUser, SignOutButton } from '@clerk/nextjs'
 import Link from 'next/link'
+import ImageUploader from '@/components/ImageUploader'
 
 export default function AdminPage() {
   const { isSignedIn, user } = useUser()
@@ -147,7 +148,9 @@ export default function AdminPage() {
   const statusColor = (s) => {
     if (s === 'delivered') return { bg: '#D6EDD4', color: '#2D5A27' }
     if (s === 'processing') return { bg: '#FDE8A8', color: '#C8790A' }
-    if (s === 'shipped') return { bg: '#DBEAFE', color: '#1D4ED8' }
+    if (s === 'confirmed') return { bg: '#DBEAFE', color: '#1D4ED8' }
+    if (s === 'shipped') return { bg: '#EDE9FE', color: '#6D28D9' }
+    if (s === 'out_for_delivery') return { bg: '#FFF7ED', color: '#C2410C' }
     if (s === 'cancelled') return { bg: '#FADBD8', color: '#C0392B' }
     return { bg: '#EDE0C4', color: '#6B3F1A' }
   }
@@ -466,13 +469,12 @@ export default function AdminPage() {
                   </div>
 
                   <div className="ad-fg wide">
-                    <label>Image URL</label>
-                    <input placeholder="https://images.unsplash.com/…" value={productForm.imageUrl} onChange={e => setProductForm(f => ({ ...f, imageUrl: e.target.value }))} />
-                    {productForm.imageUrl && (
-                      <div className="ad-img-preview-wrap">
-                        <img src={productForm.imageUrl} alt="preview" className="ad-img-preview" />
-                      </div>
-                    )}
+                    <ImageUploader
+                      label="Product Image"
+                      aspectHint="1:1 square"
+                      value={productForm.imageUrl}
+                      onChange={url => setProductForm(f => ({ ...f, imageUrl: url }))}
+                    />
                   </div>
 
                   <div className="ad-form-actions">
@@ -693,14 +695,21 @@ export default function AdminPage() {
                             <div className="ord-status-bar">
                               <span className="ord-status-label">Update Status:</span>
                               <div className="ord-status-btns">
-                                {['processing', 'shipped', 'delivered', 'cancelled'].map(s => (
+                                {[
+                                  ['processing', '⏳', 'Processing'],
+                                  ['confirmed', '✅', 'Confirmed'],
+                                  ['shipped', '📦', 'Shipped'],
+                                  ['out_for_delivery', '🚚', 'Out for Delivery'],
+                                  ['delivered', '🎉', 'Delivered'],
+                                  ['cancelled', '❌', 'Cancelled'],
+                                ].map(([s, icon, label]) => (
                                   <button
                                     key={s}
                                     className={`ord-status-btn ${order.status === s ? 'active' : ''}`}
                                     style={order.status === s ? { background: statusColor(s).bg, color: statusColor(s).color, borderColor: statusColor(s).color } : {}}
                                     onClick={() => handleOrderStatus(order.id, s)}
                                   >
-                                    {s === 'processing' ? '⏳' : s === 'shipped' ? '🚚' : s === 'delivered' ? '✅' : '❌'} {s.charAt(0).toUpperCase() + s.slice(1)}
+                                    {icon} {label}
                                   </button>
                                 ))}
                               </div>
@@ -898,9 +907,12 @@ export default function AdminPage() {
                     <div className="ad-fg"><label>Subtitle</label><input placeholder="Use code ONAM20 at checkout" value={bannerForm.subtitle} onChange={e => setBannerForm(f => ({ ...f, subtitle: e.target.value }))} /></div>
                   </div>
                   <div className="ad-fg wide" style={{ marginTop: '14px' }}>
-                    <label>Banner Image URL</label>
-                    <input placeholder="https://images.unsplash.com/…" value={bannerForm.imageUrl} onChange={e => setBannerForm(f => ({ ...f, imageUrl: e.target.value }))} />
-                    {bannerForm.imageUrl && <div className="ad-img-preview-wrap"><img src={bannerForm.imageUrl} alt="preview" className="ad-img-preview" /></div>}
+                    <ImageUploader
+                      label="Banner Image"
+                      aspectHint="16:9 landscape"
+                      value={bannerForm.imageUrl}
+                      onChange={url => setBannerForm(f => ({ ...f, imageUrl: url }))}
+                    />
                   </div>
                   <div className="ad-toggle-row" style={{ marginTop: '14px' }}>
                     <label className="ad-toggle"><input type="checkbox" checked={bannerForm.isActive} onChange={e => setBannerForm(f => ({ ...f, isActive: e.target.checked }))} /><span className="ad-toggle-track"><span className="ad-toggle-thumb" /></span></label>
@@ -1017,9 +1029,12 @@ export default function AdminPage() {
                     </div>
                   </div>
                   <div className="ad-fg wide" style={{ marginTop: '16px' }}>
-                    <label>Paste Image URL</label>
-                    <input placeholder="https://images.unsplash.com/…" value={siteImageForm.imageUrl} onChange={e => setSiteImageForm(f => ({ ...f, imageUrl: e.target.value }))} />
-                    {siteImageForm.imageUrl && <div className="ad-img-preview-wrap"><img src={siteImageForm.imageUrl} alt="preview" className="ad-img-preview" /></div>}
+                    <ImageUploader
+                      label="Upload New Image"
+                      aspectHint="varies by section"
+                      value={siteImageForm.imageUrl}
+                      onChange={url => setSiteImageForm(f => ({ ...f, imageUrl: url }))}
+                    />
                   </div>
                   <div className="ad-form-actions">
                     <button className="ad-btn green" onClick={() => {
