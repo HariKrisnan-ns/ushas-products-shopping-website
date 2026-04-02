@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { products } from '@/lib/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { getOrCreateUser } from '@/lib/getOrCreateUser'
 import { NextResponse } from 'next/server'
 
@@ -37,6 +37,33 @@ function extractProductFields(body) {
     rating: rating ? parseFloat(rating) : 0,
     reviews: reviews ? parseInt(reviews) : 0,
     inStock: inStock !== undefined ? Boolean(inStock) : true,
+  }
+}
+
+// GET — fetch products (public)
+export async function GET(req) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const search = searchParams.get('search')?.toLowerCase() || ''
+    const category = searchParams.get('category') || ''
+    const slug = searchParams.get('slug') || ''
+
+    const conditions = []
+    if (slug) conditions.push(eq(products.slug, slug))
+    if (category) conditions.push(eq(products.category, category))
+
+    let result = await db
+      .select()
+      .from(products)
+      .where(conditions.length === 0 ? undefined : conditions.length === 1 ? conditions[0] : and(...conditions))
+
+    if (search) {
+      result = result.filter(p => p.name?.toLowerCase().includes(search))
+    }
+
+    return NextResponse.json(result)
+  } catch (err) {
+    return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 })
   }
 }
 
