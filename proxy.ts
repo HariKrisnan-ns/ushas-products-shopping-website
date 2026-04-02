@@ -10,6 +10,7 @@ import { eq } from 'drizzle-orm'
 const isProtectedRoute = createRouteMatcher([
   '/cart(.*)',
   '/checkout(.*)',
+  '/orders(.*)',
   '/wishlist(.*)',
   '/profile(.*)',
   '/admin(.*)',
