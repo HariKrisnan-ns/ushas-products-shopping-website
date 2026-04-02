@@ -27,8 +27,8 @@ export default function ImageUploader({ value, onChange, label = 'Image', aspect
       setError('Please select an image file (JPG, PNG, WebP, etc.)')
       return
     }
-    if (file.size > 10 * 1024 * 1024) {
-      setError('File too large. Maximum size is 10MB.')
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File too large. Maximum size is 5MB.')
       return
     }
     if (!CLOUD_NAME || !UPLOAD_PRESET) {
@@ -220,7 +220,7 @@ export default function ImageUploader({ value, onChange, label = 'Image', aspect
                 {dragOver ? 'Drop to upload!' : 'Drag & drop or click to upload'}
               </div>
               <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 12, lineHeight: 1.5 }}>
-                JPG, PNG, WebP, GIF · Max 10MB
+                JPG, PNG, WebP · Max 5MB
               </div>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
                 <button

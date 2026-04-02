@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { addresses } from '@/lib/schema'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { getOrCreateUser } from '@/lib/getOrCreateUser'
 import { NextResponse } from 'next/server'
 
@@ -55,8 +55,15 @@ export async function DELETE(req) {
 
     try {
         const { id } = await req.json()
-        await db.delete(addresses)
-            .where(eq(addresses.id, id))
+
+        // ✅ Security fix: only delete if the address belongs to the current user
+        const result = await db.delete(addresses)
+            .where(and(eq(addresses.id, id), eq(addresses.userId, userId)))
+            .returning()
+
+        if (result.length === 0) {
+            return NextResponse.json({ error: 'Address not found or not yours' }, { status: 403 })
+        }
 
         return NextResponse.json({ success: true })
     } catch (error) {

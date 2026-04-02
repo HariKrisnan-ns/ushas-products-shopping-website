@@ -1,8 +1,9 @@
 import { db } from '@/lib/db'
 import { orders, orderItems, products, addresses } from '@/lib/schema'
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 import { getOrCreateUser } from '@/lib/getOrCreateUser'
 import { NextResponse } from 'next/server'
+import { isRateLimited } from '@/lib/rateLimit'
 
 // GET - fetch user's orders
 export async function GET() {
@@ -46,11 +47,51 @@ export async function POST(req) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const userId = user.clerkId
 
+    // ✅ Rate limit: max 10 order attempts per minute per user
+    if (isRateLimited(userId, 10, 60_000)) {
+        return NextResponse.json({ error: 'Too many requests. Please wait a moment.' }, { status: 429 })
+    }
+
     try {
-        const { items, addressId, paymentMethod, subtotal, deliveryFee } = await req.json()
+        // ✅ Security fix: only accept productId and quantity from client — never price
+        const { items, addressId, paymentMethod } = await req.json()
+
+        if (!items || !Array.isArray(items) || items.length === 0) {
+            return NextResponse.json({ error: 'No items provided' }, { status: 400 })
+        }
+
+        // ✅ Fetch real prices from DB — never trust client-sent prices
+        const productIds = items.map(i => i.productId)
+        const dbProducts = await db.select().from(products)
+            .where(inArray(products.id, productIds))
+
+        // Map productId → real DB price
+        const priceMap = {}
+        for (const p of dbProducts) {
+            priceMap[p.id] = p.price
+        }
+
+        // Verify all products exist and are in stock
+        for (const item of items) {
+            const product = dbProducts.find(p => p.id === item.productId)
+            if (!product) {
+                return NextResponse.json({ error: `Product ${item.productId} not found` }, { status: 400 })
+            }
+            if (!product.inStock) {
+                return NextResponse.json({ error: `"${product.name}" is out of stock` }, { status: 400 })
+            }
+        }
+
+        // ✅ Calculate subtotal server-side using real DB prices
+        const subtotal = items.reduce((sum, item) => {
+            return sum + (priceMap[item.productId] * item.quantity)
+        }, 0)
+
+        // ✅ Calculate delivery fee server-side (free above ₹500)
+        const deliveryFee = subtotal >= 500 ? 0 : 49
+        const total = subtotal + deliveryFee
 
         const orderNumber = 'USH-' + Date.now()
-        const total = subtotal + deliveryFee
 
         // create order
         const [order] = await db.insert(orders)
@@ -66,13 +107,13 @@ export async function POST(req) {
             })
             .returning()
 
-        // create order items
+        // create order items with real DB prices
         for (const item of items) {
             await db.insert(orderItems).values({
                 orderId: order.id,
                 productId: item.productId,
                 quantity: item.quantity,
-                price: item.price,
+                price: priceMap[item.productId], // ✅ real price from DB, not client
             })
         }
 
