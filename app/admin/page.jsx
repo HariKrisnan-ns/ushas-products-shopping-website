@@ -17,6 +17,8 @@ export default function AdminPage() {
 
   const [productForm, setProductForm] = useState({ name: '', slug: '', category: 'Snacks', price: '', mrp: '', description: '', imageUrl: '', weight: '', shelfLife: '', tag: '', badge: '', inStock: true })
   const [editingProduct, setEditingProduct] = useState(null)
+  const [extraImages, setExtraImages] = useState([]) // extra images for current product
+  const [loadingImages, setLoadingImages] = useState(false)
   const [announcementForm, setAnnouncementForm] = useState({ message: '', color: '#3A6B35', isActive: true })
   const [editingAnnouncement, setEditingAnnouncement] = useState(null)
   const [popupForm, setPopupForm] = useState({ title: '', message: '', isActive: false })
@@ -54,6 +56,7 @@ export default function AdminPage() {
     }
     setProductForm({ name: '', slug: '', category: 'Snacks', price: '', mrp: '', description: '', imageUrl: '', weight: '', shelfLife: '', tag: '', badge: '', inStock: true })
     setEditingProduct(null)
+    setExtraImages([])
     fetchData()
   }
 
@@ -61,7 +64,38 @@ export default function AdminPage() {
     setEditingProduct(p)
     setProductForm({ name: p.name, slug: p.slug, category: p.category, price: p.price, mrp: p.mrp, description: p.description || '', imageUrl: p.imageUrl || '', weight: p.weight || '', shelfLife: p.shelfLife || '', tag: p.tag || '', badge: p.badge || '', inStock: p.inStock })
     setActiveTab('products')
+    fetchExtraImages(p.id)
     window.scrollTo(0, 0)
+  }
+
+  const fetchExtraImages = async (productId) => {
+    setLoadingImages(true)
+    const res = await fetch(`/api/admin/product-images?productId=${productId}`)
+    const imgs = await res.json()
+    setExtraImages(imgs)
+    setLoadingImages(false)
+  }
+
+  const addExtraImage = async (url) => {
+    if (!editingProduct) return
+    const res = await fetch('/api/admin/product-images', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId: editingProduct.id, imageUrl: url, position: extraImages.length })
+    })
+    const img = await res.json()
+    setExtraImages(prev => [...prev, img])
+    showToast('🖼️ Image added!')
+  }
+
+  const removeExtraImage = async (id) => {
+    await fetch('/api/admin/product-images', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    })
+    setExtraImages(prev => prev.filter(i => i.id !== id))
+    showToast('🗑️ Image removed!')
   }
 
   const handleDeleteProduct = async (id) => {
@@ -470,12 +504,60 @@ export default function AdminPage() {
 
                   <div className="ad-fg wide">
                     <ImageUploader
-                      label="Product Image"
+                      label="Main Product Image (used as thumbnail in shop)"
                       aspectHint="1:1 square"
                       value={productForm.imageUrl}
                       onChange={url => setProductForm(f => ({ ...f, imageUrl: url }))}
                     />
                   </div>
+
+                  {/* ✅ Extra images — only show when editing an existing product */}
+                  {editingProduct && (
+                    <div className="ad-fg wide">
+                      <label style={{ fontWeight: 800, fontSize: 13, color: 'var(--text)', marginBottom: 10, display: 'block' }}>
+                        🖼️ Extra Product Images
+                        <span style={{ fontWeight: 500, color: 'var(--muted)', marginLeft: 8 }}>
+                          (shown in gallery on product page — images won't be cropped)
+                        </span>
+                      </label>
+
+                      {/* Existing extra images */}
+                      {loadingImages ? (
+                        <div style={{ color: 'var(--muted)', fontSize: 13 }}>Loading images…</div>
+                      ) : (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
+                          {extraImages.map(img => (
+                            <div key={img.id} style={{ position: 'relative', width: 90, height: 90, borderRadius: 10, overflow: 'hidden', border: '1.5px solid var(--border)', background: '#fff' }}>
+                              <img src={img.imageUrl} alt="product" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 4 }} />
+                              <button
+                                onClick={() => removeExtraImage(img.id)}
+                                style={{ position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: '50%', background: '#C0392B', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, lineHeight: 1 }}
+                                title="Remove image"
+                              >×</button>
+                            </div>
+                          ))}
+                          {extraImages.length === 0 && (
+                            <div style={{ color: 'var(--muted)', fontSize: 13, padding: '12px 0' }}>No extra images yet. Upload one below.</div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Upload new extra image */}
+                      <ImageUploader
+                        label="Upload Extra Image"
+                        aspectHint="any ratio"
+                        value=""
+                        onChange={url => addExtraImage(url)}
+                      />
+                    </div>
+                  )}
+                  {!editingProduct && (
+                    <div className="ad-fg wide">
+                      <div style={{ background: 'var(--cream2)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 16px', fontSize: 13, color: 'var(--muted)' }}>
+                        💡 <strong>Tip:</strong> Save the product first, then edit it to add extra gallery images.
+                      </div>
+                    </div>
+                  )}
 
                   <div className="ad-form-actions">
                     <button className="ad-btn green" onClick={handleProductSubmit}>

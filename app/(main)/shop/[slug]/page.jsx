@@ -16,11 +16,21 @@ export default function ProductDetailPage() {
   const [wishlisted, setWishlisted] = useState(false)
   const [addedToCart, setAddedToCart] = useState(false)
   const [activeTab, setActiveTab] = useState('description')
+  const [activeIndex, setActiveIndex] = useState(0) // carousel index
+  const [touchStart, setTouchStart] = useState(null) // for swipe on mobile
 
   useEffect(() => {
     fetch(`/api/products?slug=${slug}`)
       .then(res => res.json())
-      .then(data => { setProduct(data[0] || null); setLoading(false) })
+      .then(data => {
+        const p = data[0] || null
+        setProduct(p)
+        // Set first image: use extra images if available, else fall back to imageUrl
+        if (p) {
+          setActiveIndex(0) // always start from first image
+        }
+        setLoading(false)
+      })
       .catch(() => { setProduct(null); setLoading(false) })
   }, [slug])
 
@@ -58,6 +68,19 @@ export default function ProductDetailPage() {
     } catch {
       showToast('❌ Something went wrong')
     }
+  }
+
+  // Build full image list: extra images first, then fall back to main imageUrl
+  const getAllImages = (p) => {
+    if (!p) return []
+    const all = []
+    // Always include the main imageUrl first
+    if (p.imageUrl) all.push(p.imageUrl)
+    // Then add any extra uploaded images (avoid duplicates)
+    for (const img of (p.images || [])) {
+      if (img.imageUrl && img.imageUrl !== p.imageUrl) all.push(img.imageUrl)
+    }
+    return all
   }
 
   const discount = product ? Math.round((1 - product.price / product.mrp) * 100) : 0
@@ -105,6 +128,8 @@ export default function ProductDetailPage() {
     </>
   )
 
+  const allImages = getAllImages(product)
+
   return (
     <>
       <style>{`
@@ -120,7 +145,6 @@ export default function ProductDetailPage() {
         }
         body { font-family:'Nunito',sans-serif; background:var(--cream); color:var(--text); }
 
-        /* ── BREADCRUMB ── */
         .bc {
           padding:14px 80px;
           background:var(--cream2);
@@ -133,31 +157,100 @@ export default function ProductDetailPage() {
         .bc-sep { color:var(--border); font-size:14px; }
         .bc-current { color:var(--text); }
 
-        /* ── MAIN LAYOUT ── */
         .pd-wrap { padding:56px 80px; }
         .pd-layout {
           display:grid; grid-template-columns:1fr 1fr;
           gap:64px; align-items:start;
         }
 
-        /* ── IMAGE SIDE ── */
+        /* ── IMAGE CAROUSEL ── */
         .pd-img-side {}
-        .pd-img-main-wrap {
-          position:relative; border-radius:24px; overflow:hidden;
+
+        .pd-carousel {
+          position:relative;
+          border-radius:24px;
+          overflow:hidden;          /* keeps arrows/dots inside rounded corners */
           border:1px solid var(--border);
           box-shadow:0 16px 56px var(--shadow);
+          background:#fff;
+          user-select:none;
         }
-        .pd-img-main {
-          width:100%; height:460px; object-fit:cover;
-          display:block;
-          transition:transform 0.5s ease;
+        .pd-slides-wrapper {
+          width:100%;
+          overflow:hidden;
+          border-radius:24px;
         }
-        .pd-img-main-wrap:hover .pd-img-main { transform:scale(1.04); }
 
-        /* Badge on image */
+        /* Slides track */
+        .pd-slides-wrapper {
+          width:100%;
+          overflow:hidden;       /* ✅ clips slides outside view */
+        }
+        .pd-slides-track {
+          display:flex;
+          transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);
+          will-change:transform;
+          width:100%;
+        }
+        .pd-slide {
+          min-width:100%;
+          width:100%;
+          height:480px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          background:#fff;
+          padding:16px;
+          flex-shrink:0;
+          box-sizing:border-box;
+        }
+        .pd-slide img {
+          max-width:100%; max-height:100%;
+          width:auto; height:auto;
+          object-fit:contain;   /* ✅ never cropped */
+          display:block;
+        }
+
+        /* Prev / Next arrow buttons */
+        .pd-arrow {
+          position:absolute; top:50%; transform:translateY(-50%);
+          width:40px; height:40px; border-radius:50%;
+          background:rgba(255,255,255,0.92);
+          border:1px solid var(--border);
+          box-shadow:0 2px 12px var(--shadow);
+          display:flex; align-items:center; justify-content:center;
+          cursor:pointer; z-index:10;
+          font-size:18px; color:var(--text);
+          transition:background 0.2s, transform 0.15s;
+        }
+        .pd-arrow:hover { background:#fff; transform:translateY(-50%) scale(1.08); }
+        .pd-arrow.prev { left:12px; }
+        .pd-arrow.next { right:12px; }
+        .pd-arrow.hidden { display:none; }
+
+        /* Dot indicators */
+        .pd-dots {
+          position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
+          display:flex; gap:7px; z-index:10;
+        }
+        .pd-dot {
+          width:8px; height:8px; border-radius:50%;
+          background:rgba(30,18,10,0.2);
+          cursor:pointer;
+          transition:background 0.2s, transform 0.2s;
+          border:none;
+          padding:0;
+        }
+        .pd-dot.active {
+          background:var(--green-m);
+          transform:scale(1.3);
+        }
+
+        /* Badge on carousel */
         .pd-img-badge {
           position:absolute; top:20px; left:20px;
           display:flex; flex-direction:column; gap:8px;
+          pointer-events:none; z-index:10;
         }
         .pd-badge {
           font-size:10px; font-weight:800; padding:5px 14px;
@@ -173,12 +266,21 @@ export default function ProductDetailPage() {
           color:var(--red); font-size:12px;
         }
 
+        /* Image counter e.g. 2 / 5 */
+        .pd-counter {
+          position:absolute; top:14px; right:14px;
+          background:rgba(30,18,10,0.5); color:#fff;
+          font-size:11px; font-weight:700;
+          padding:4px 10px; border-radius:20px;
+          z-index:10; pointer-events:none;
+        }
+
         /* Out of stock overlay */
         .pd-out-overlay {
           position:absolute; inset:0;
           background:rgba(255,255,255,0.75);
           display:flex; align-items:center; justify-content:center;
-          backdrop-filter:blur(3px);
+          backdrop-filter:blur(3px); z-index:5;
         }
         .pd-out-label {
           background:var(--brown); color:#fff;
@@ -186,7 +288,7 @@ export default function ProductDetailPage() {
           border-radius:8px; letter-spacing:0.08em; text-transform:uppercase;
         }
 
-        /* Trust row below image */
+        /* Trust row below thumbnails */
         .pd-img-trust {
           display:grid; grid-template-columns:repeat(3,1fr);
           gap:12px; margin-top:16px;
@@ -201,7 +303,6 @@ export default function ProductDetailPage() {
 
         /* ── INFO SIDE ── */
         .pd-info {}
-
         .pd-category {
           display:inline-flex; align-items:center; gap:6px;
           background:var(--green-pl); color:var(--green-m);
@@ -209,13 +310,10 @@ export default function ProductDetailPage() {
           text-transform:uppercase; padding:5px 14px; border-radius:40px;
           margin-bottom:16px;
         }
-
         .pd-name {
           font-family:'Tiro Malayalam',serif; font-size:42px;
           line-height:1.12; color:var(--text); margin-bottom:12px;
         }
-
-        /* Rating */
         .pd-rating {
           display:flex; align-items:center; gap:10px; margin-bottom:20px;
         }
@@ -223,8 +321,6 @@ export default function ProductDetailPage() {
         .pd-rating-num { font-size:14px; font-weight:800; color:var(--text); }
         .pd-rating-count { font-size:13px; color:var(--muted); }
         .pd-rating-dot { width:4px; height:4px; border-radius:50%; background:var(--border); }
-
-        /* Price block */
         .pd-price-block {
           background:linear-gradient(135deg, var(--cream2), var(--gold-pl));
           border:1px solid rgba(200,121,10,0.15);
@@ -239,11 +335,7 @@ export default function ProductDetailPage() {
           font-size:12px; font-weight:800; padding:4px 12px;
           border-radius:20px; margin-left:auto;
         }
-
-        /* Description */
         .pd-desc { font-size:15px; color:var(--muted); line-height:1.85; margin-bottom:24px; }
-
-        /* Meta table */
         .pd-meta {
           background:#fff; border:1px solid var(--border);
           border-radius:14px; overflow:hidden; margin-bottom:24px;
@@ -262,8 +354,6 @@ export default function ProductDetailPage() {
         .pd-meta-val { color:var(--muted); font-weight:600; }
         .pd-meta-val.green { color:var(--green-m); font-weight:800; }
         .pd-meta-val.red { color:var(--red); font-weight:800; }
-
-        /* Qty row */
         .pd-qty-row {
           display:flex; align-items:center; gap:16px; margin-bottom:20px;
         }
@@ -284,8 +374,6 @@ export default function ProductDetailPage() {
           border-left:1px solid var(--border); border-right:1px solid var(--border);
           height:40px; display:flex; align-items:center; justify-content:center;
         }
-
-        /* Action buttons */
         .pd-btns { display:flex; gap:12px; margin-bottom:20px; }
         .pd-btn-cart {
           flex:1; padding:15px 24px;
@@ -300,7 +388,6 @@ export default function ProductDetailPage() {
         .pd-btn-cart:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 6px 28px rgba(45,90,39,0.4); }
         .pd-btn-cart:disabled { background:#c8c8c8; cursor:not-allowed; box-shadow:none; }
         .pd-btn-cart.added { background:linear-gradient(135deg, var(--gold) 0%, var(--gold-lt) 100%); color:#1E120A; }
-
         .pd-btn-wish {
           width:52px; height:52px; flex-shrink:0; border-radius:12px;
           background:#fff; border:1.5px solid var(--border);
@@ -310,8 +397,6 @@ export default function ProductDetailPage() {
         }
         .pd-btn-wish:hover { border-color:var(--red); transform:scale(1.08); }
         .pd-btn-wish.active { border-color:var(--red); background:#fff5f5; }
-
-        /* Info badges */
         .pd-badges { display:flex; gap:10px; flex-wrap:wrap; }
         .pd-info-badge {
           display:flex; align-items:center; gap:6px;
@@ -336,7 +421,6 @@ export default function ProductDetailPage() {
         }
         .pd-tab-btn:hover { color:var(--text); }
         .pd-tab-btn.active { color:var(--green-m); border-bottom-color:var(--green-m); }
-
         .pd-tab-content { font-size:15px; color:var(--muted); line-height:1.85; max-width:680px; }
         .pd-tab-content h4 { font-size:16px; font-weight:800; color:var(--text); margin-bottom:10px; margin-top:20px; }
         .pd-tab-content h4:first-child { margin-top:0; }
@@ -398,16 +482,18 @@ export default function ProductDetailPage() {
           .pd-price { font-size:34px; }
           .pd-tabs-wrap { padding:0 20px 80px; }
           .pd-sticky-cta { display:flex; align-items:center; }
+          .pd-thumb { width:62px; height:62px; }
         }
         @media(max-width:480px) {
           .bc { padding:10px 16px; }
           .pd-wrap { padding:16px; }
           .pd-name { font-size:26px; }
           .pd-price { font-size:28px; }
-          .pd-img-main { height:240px; }
+          .pd-img-main { height:260px; }
           .pd-img-trust { grid-template-columns:repeat(3,1fr); }
           .pd-tab-btn { padding:11px 16px; font-size:13px; }
           .pd-tabs-wrap { padding:0 16px 80px; }
+          .pd-thumb { width:54px; height:54px; }
         }
       `}</style>
 
@@ -424,10 +510,66 @@ export default function ProductDetailPage() {
       <div className="pd-wrap">
         <div className="pd-layout">
 
-          {/* ── IMAGE ── */}
+          {/* ── IMAGE CAROUSEL ── */}
           <div className="pd-img-side">
-            <div className="pd-img-main-wrap">
-              <img src={product.imageUrl} alt={product.name} className="pd-img-main" />
+            <div
+              className="pd-carousel"
+              onTouchStart={e => setTouchStart(e.touches[0].clientX)}
+              onTouchEnd={e => {
+                if (touchStart === null) return
+                const diff = touchStart - e.changedTouches[0].clientX
+                if (diff > 50) setActiveIndex(i => Math.min(allImages.length - 1, i + 1)) // swipe left → next
+                if (diff < -50) setActiveIndex(i => Math.max(0, i - 1))                    // swipe right → prev
+                setTouchStart(null)
+              }}
+            >
+
+              {/* Slides */}
+              <div className="pd-slides-wrapper">
+                <div
+                  className="pd-slides-track"
+                  style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+                >
+                  {allImages.map((url, i) => (
+                    <div className="pd-slide" key={i}>
+                      <img src={url} alt={`${product.name} — image ${i + 1}`} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Prev arrow */}
+              <button
+                className={`pd-arrow prev ${activeIndex === 0 ? 'hidden' : ''}`}
+                onClick={() => setActiveIndex(i => Math.max(0, i - 1))}
+                aria-label="Previous image"
+              >‹</button>
+
+              {/* Next arrow */}
+              <button
+                className={`pd-arrow next ${activeIndex === allImages.length - 1 ? 'hidden' : ''}`}
+                onClick={() => setActiveIndex(i => Math.min(allImages.length - 1, i + 1))}
+                aria-label="Next image"
+              >›</button>
+
+              {/* Dot indicators — only if more than 1 image */}
+              {allImages.length > 1 && (
+                <div className="pd-dots">
+                  {allImages.map((_, i) => (
+                    <button
+                      key={i}
+                      className={`pd-dot ${activeIndex === i ? 'active' : ''}`}
+                      onClick={() => setActiveIndex(i)}
+                      aria-label={`Go to image ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Image counter */}
+              {allImages.length > 1 && (
+                <div className="pd-counter">{activeIndex + 1} / {allImages.length}</div>
+              )}
 
               {/* Badges */}
               <div className="pd-img-badge">
@@ -439,7 +581,7 @@ export default function ProductDetailPage() {
                 )}
               </div>
 
-              {/* Out of stock */}
+              {/* Out of stock overlay */}
               {!product.inStock && (
                 <div className="pd-out-overlay">
                   <span className="pd-out-label">Out of Stock</span>
@@ -466,10 +608,8 @@ export default function ProductDetailPage() {
           {/* ── INFO ── */}
           <div className="pd-info">
             <div className="pd-category">🌿 {product.category}</div>
-
             <h1 className="pd-name">{product.name}</h1>
 
-            {/* Rating */}
             {product.rating && (
               <div className="pd-rating">
                 <span className="pd-stars">
@@ -481,7 +621,6 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {/* Price */}
             <div className="pd-price-block">
               <div>
                 <span className="pd-price">₹{product.price}</span>
@@ -494,10 +633,8 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Description */}
             <p className="pd-desc">{product.description}</p>
 
-            {/* Meta */}
             <div className="pd-meta">
               {[
                 ['Weight', product.weight],
@@ -513,7 +650,6 @@ export default function ProductDetailPage() {
               ))}
             </div>
 
-            {/* Quantity */}
             <div className="pd-qty-row">
               <span className="pd-qty-label">Quantity</span>
               <div className="pd-qty-ctrl">
@@ -528,7 +664,6 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Buttons */}
             <div className="pd-btns">
               <button
                 className={`pd-btn-cart ${addedToCart ? 'added' : ''}`}
@@ -546,7 +681,6 @@ export default function ProductDetailPage() {
               </button>
             </div>
 
-            {/* Info badges */}
             <div className="pd-badges">
               {['🌿 Natural', '🥥 Coconut Oil', '📦 Vacuum Sealed', '✅ FSSAI Certified'].map(b => (
                 <span className="pd-info-badge" key={b}>{b}</span>
