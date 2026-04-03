@@ -10,6 +10,15 @@ export default function HomePage() {
   const [activePopup, setActivePopup] = useState(null)
   const [toast, setToast] = useState(null)
   const [visibleSections, setVisibleSections] = useState({})
+  const [heroSlide, setHeroSlide] = useState(0)
+
+  const HERO_SLIDES = [
+    'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=1600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=1600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=1600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1606914501449-5a96b6ce24ca?w=1600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=1600&auto=format&fit=crop&q=80',
+  ]
 
   useEffect(() => {
     fetch('/api/products')
@@ -28,6 +37,14 @@ export default function HomePage() {
       })
       .catch(() => {})
   }, [])
+
+  // Auto-advance hero slides
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHeroSlide(prev => (prev + 1) % HERO_SLIDES.length)
+    }, 5000)
+    return () => clearInterval(timer)
+  }, [HERO_SLIDES.length])
 
   // Intersection observer for scroll animations
   useEffect(() => {
@@ -129,31 +146,79 @@ export default function HomePage() {
           align-items:center;
           padding:80px;
           position:relative; overflow:hidden;
-          background: linear-gradient(145deg, #1a3d17 0%, #2d5a27 40%, #3d7a36 70%, #1e4a1a 100%);
+          background: #0e2a0c;
         }
+
+        /* ── HERO SLIDER ── */
+        .hero-slides {
+          position:absolute; inset:0; z-index:0;
+        }
+        .hero-slide {
+          position:absolute; inset:0;
+          background-size:cover; background-position:center;
+          opacity:0;
+          transition:opacity 1.2s ease;
+          transform:scale(1.08);
+          animation:none;
+        }
+        .hero-slide.active {
+          opacity:1;
+          animation:kenBurns 10s ease-in-out forwards;
+        }
+        @keyframes kenBurns {
+          0%   { transform:scale(1.08) translateX(0); }
+          100% { transform:scale(1) translateX(-8px); }
+        }
+        .hero-slide-overlay {
+          position:absolute; inset:0; z-index:1;
+          background:linear-gradient(
+            105deg,
+            rgba(10,30,8,0.88) 0%,
+            rgba(10,30,8,0.72) 45%,
+            rgba(10,30,8,0.35) 75%,
+            rgba(10,30,8,0.15) 100%
+          );
+        }
+        /* Slide dots */
+        .hero-dots {
+          position:absolute; bottom:28px; left:80px; z-index:10;
+          display:flex; gap:8px; align-items:center;
+        }
+        .hero-dot {
+          width:8px; height:8px; border-radius:50%;
+          background:rgba(255,255,255,0.35);
+          border:none; cursor:pointer; padding:0;
+          transition:all 0.3s;
+        }
+        .hero-dot.active {
+          width:28px; border-radius:4px;
+          background:var(--gold-lt);
+        }
+        .hero-dot:hover { background:rgba(255,255,255,0.7); }
 
         /* Decorative background circles */
         .hero::before {
           content:'';
-          position:absolute; top:-120px; right:-80px;
+          position:absolute; top:-120px; right:-80px; z-index:2;
           width:600px; height:600px; border-radius:50%;
-          background:radial-gradient(circle, rgba(200,121,10,0.18) 0%, transparent 70%);
+          background:radial-gradient(circle, rgba(200,121,10,0.14) 0%, transparent 70%);
           pointer-events:none;
         }
         .hero-bg-pattern {
-          position:absolute; inset:0; opacity:0.04;
+          position:absolute; inset:0; opacity:0.03; z-index:2;
           background-image: repeating-linear-gradient(45deg, #fff 0px, #fff 1px, transparent 1px, transparent 50%);
           background-size:28px 28px;
           pointer-events:none;
         }
         .hero-glow {
-          position:absolute; bottom:-60px; left:30%;
+          position:absolute; bottom:-60px; left:30%; z-index:2;
           width:400px; height:300px;
-          background:radial-gradient(ellipse, rgba(200,121,10,0.22) 0%, transparent 70%);
+          background:radial-gradient(ellipse, rgba(200,121,10,0.18) 0%, transparent 70%);
           pointer-events:none;
         }
 
-        .hero-content { position:relative; z-index:2; }
+        .hero-content { position:relative; z-index:5; }
+        .hero-visual { position:relative; z-index:5; display:flex; align-items:center; justify-content:center; }
         .hero-eyebrow {
           display:inline-flex; align-items:center; gap:8px;
           background:rgba(240,180,41,0.15); border:1px solid rgba(240,180,41,0.3);
@@ -221,10 +286,6 @@ export default function HomePage() {
         .hero-stat-label { font-size:12px; color:rgba(255,255,255,0.5); font-weight:600; margin-top:4px; letter-spacing:0.04em; }
 
         /* Hero image side */
-        .hero-visual {
-          position:relative; z-index:2;
-          display:flex; align-items:center; justify-content:center;
-        }
         .hero-img-frame {
           position:relative; width:100%; max-width:480px;
         }
@@ -339,7 +400,7 @@ export default function HomePage() {
 
         /* ── CATEGORIES ── */
         .cat-grid {
-          display:grid; grid-template-columns:repeat(5,1fr); gap:16px;
+          display:grid; grid-template-columns:repeat(4,1fr); gap:20px;
         }
         .cat-card {
           display:flex; flex-direction:column; align-items:center; gap:12px;
@@ -723,6 +784,18 @@ export default function HomePage() {
 
       {/* ── HERO ── */}
       <section className="hero">
+        {/* Sliding background images */}
+        <div className="hero-slides">
+          {HERO_SLIDES.map((src, i) => (
+            <div
+              key={i}
+              className={`hero-slide${heroSlide === i ? ' active' : ''}`}
+              style={{ backgroundImage: `url('${src}')` }}
+            />
+          ))}
+          <div className="hero-slide-overlay" />
+        </div>
+
         <div className="hero-bg-pattern" />
         <div className="hero-glow" />
 
@@ -783,6 +856,18 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+
+        {/* Slide dots */}
+        <div className="hero-dots">
+          {HERO_SLIDES.map((_, i) => (
+            <button
+              key={i}
+              className={`hero-dot${heroSlide === i ? ' active' : ''}`}
+              onClick={() => setHeroSlide(i)}
+              aria-label={`Go to slide ${i + 1}`}
+            />
+          ))}
+        </div>
       </section>
 
       {/* ── TRUST BAR ── */}
@@ -830,12 +915,11 @@ export default function HomePage() {
         </div>
         <div className="cat-grid">
           {[
-            ['🍌', 'Snacks', '12 items'],
-            ['🥥', 'Health', '8 items'],
-            ['🫚', 'Oils', '5 items'],
-            ['🌾', 'Traditional', '10 items'],
-            ['🌿', 'Organic', '6 items'],
-          ].map(([ic, lb, count], i) => (
+            ['🍿', 'Snacks', 'Crispy & Tasty'],
+            ['🫙', 'Pickles', 'Tangy & Spicy'],
+            ['🫒', 'Oil', 'Pure & Natural'],
+            ['🌶️', 'Powder', 'Fresh Ground'],
+          ].map(([ic, lb, desc], i) => (
             <Link
               key={lb}
               href={`/shop?category=${lb}`}
@@ -845,7 +929,7 @@ export default function HomePage() {
             >
               <div className="cat-icon-wrap">{ic}</div>
               <div className="cat-label">{lb}</div>
-              <div className="cat-count">{count}</div>
+              <div className="cat-count">{desc}</div>
             </Link>
           ))}
         </div>
@@ -879,7 +963,7 @@ export default function HomePage() {
               return (
                 <div key={p.id} className={`prod-card reveal d${i + 1}`} id={`prod-${p.id}`} data-animate>
                   <div className="prod-img-wrap">
-                    <img src={p.imageUrl} alt={p.name} className="prod-img" />
+                    <img src={p.imageUrl || null} alt={p.name} className="prod-img" />
                     {p.badge && (
                       <span className={`prod-badge ${p.badge.toLowerCase()}`}>{p.badge}</span>
                     )}

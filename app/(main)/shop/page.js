@@ -601,7 +601,7 @@ function ShopPage() {
                 return (
                   <div key={p.id} className="prod-card">
                     <div className="prod-img-wrap">
-                      <img src={p.imageUrl} alt={p.name} className="prod-img" />
+                      <img src={p.imageUrl || null} alt={p.name} className="prod-img" />
                       {p.badge && (
                         <span className={`prod-badge ${p.badge.toLowerCase()}`}>{p.badge}</span>
                       )}
@@ -693,11 +693,10 @@ function SidebarContent({ activeFilters, toggleFilter, sort, setSort, setActiveF
         </div>
         <div className="filter-card-body">
           {[
-            ['🍌', 'Snacks'],
-            ['🥥', 'Health'],
-            ['🫚', 'Beverages'],
-            ['🌾', 'Traditional'],
-            ['🌿', 'Organic'],
+            ['🍿', 'Snacks'],
+            ['🫙', 'Pickles'],
+            ['🫒', 'Oil'],
+            ['🌶️', 'Powder'],
           ].map(([ic, cat]) => (
             <div
               key={cat}
