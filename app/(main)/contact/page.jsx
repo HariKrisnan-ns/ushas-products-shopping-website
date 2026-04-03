@@ -371,9 +371,9 @@ export default function ContactPage() {
           <div className="ct-cards">
             {[
               { ic: '📍', h: 'Our Address', d: 'Ushas Products, NH 544, Thrissur\nKerala, India — 680001', link: null },
-              { ic: '📞', h: 'Phone', d: '+91 98765 43210', link: 'tel:+919876543210' },
-              { ic: '📧', h: 'Email', d: 'hello@ushasproducts.in\norders@ushasproducts.in', link: 'mailto:hello@ushasproducts.in' },
-              { ic: '💬', h: 'WhatsApp', d: 'Chat with us directly on WhatsApp for quick replies.', link: 'https://wa.me/919876543210' },
+              { ic: '📞', h: 'Phone', d: '+91 8606371530', link: 'tel:+918606371530' },
+              { ic: '📧', h: 'Email', d: 'Productsushas@gmail.com', link: 'mailto:Productsushas@gmail.com' },
+              { ic: '💬', h: 'WhatsApp', d: 'Chat with us directly on WhatsApp for quick replies.', link: 'https://wa.me/918606371530' },
             ].map((c, i) => (
               <div key={c.h} className={`ct-card reveal d${i + 1}`}>
                 <div className="ct-card-icon">{c.ic}</div>
@@ -390,9 +390,7 @@ export default function ContactPage() {
           <div className="ct-hours reveal">
             <div className="ct-hours-title">🕐 Business Hours</div>
             {[
-              ['Monday – Friday', '9:00 AM – 6:00 PM'],
-              ['Saturday', '10:00 AM – 4:00 PM'],
-              ['Sunday', 'Closed'],
+              ['Monday – Saturday', '9:00 AM – 6:00 PM'],
             ].map(([day, time]) => (
               <div key={day} className="ct-hours-row">
                 <span className="day">{day}</span>
@@ -406,7 +404,7 @@ export default function ContactPage() {
             <div className="ct-socials-title">Follow Us</div>
             <div className="ct-socials">
               {[
-                { ic: '📸', label: 'Instagram', href: 'https://instagram.com/ushasproducts' },
+                { ic: '📸', label: 'Instagram', href: 'https://www.instagram.com/products_ushas/' },
                 { ic: '📘', label: 'Facebook', href: 'https://facebook.com/ushasproducts' },
                 { ic: '▶️', label: 'YouTube', href: '#' },
               ].map(s => (

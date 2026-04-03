@@ -376,13 +376,7 @@ export default function AboutPage() {
             alt="Kerala food"
             className="ab-hero-img"
           />
-          <div className="ab-hero-badge">
-            <div className="ab-hero-badge-icon">🥥</div>
-            <div>
-              <div className="ab-hero-badge-title">100% Natural</div>
-              <div className="ab-hero-badge-sub">No preservatives ever</div>
-            </div>
-          </div>
+
         </div>
       </div>
 
