@@ -1088,7 +1088,7 @@ export default function AdminPage() {
             <div className="ad-content">
               <div className="ad-page-header">
                 <h1 className="ad-page-title">Site Images</h1>
-                <p className="ad-page-sub">Update hero banners, about page images, and team photos</p>
+                <p className="ad-page-sub">Update the navbar logo, hero banners, about page images, and team photos</p>
               </div>
               <div className="ad-card">
                 <div className="ad-card-head"><div className="ad-card-title">🖼️ Update Image</div></div>
@@ -1097,6 +1097,7 @@ export default function AdminPage() {
                     <label>Select Image to Update</label>
                     <div className="ad-chip-group">
                       {[
+                        { key: 'navbar_logo', label: '🏷️ Navbar Logo' },
                         { key: 'hero', label: '🏠 Hero' },
                         { key: 'about_hero', label: '📖 About Hero' },
                         { key: 'about_story', label: '📸 Our Story' },

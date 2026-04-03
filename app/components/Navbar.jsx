@@ -3,13 +3,26 @@ import { useUser, SignInButton, SignOutButton } from '@clerk/nextjs'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import Image from 'next/image'
 
 export default function Navbar() {
   const { isSignedIn, user } = useUser()
   const [menuOpen, setMenuOpen] = useState(false)
   const [cartCount, setCartCount] = useState(0)
   const [scrolled, setScrolled] = useState(false)
+  const [logoUrl, setLogoUrl] = useState(null)
   const pathname = usePathname()
+
+  // Fetch navbar logo from siteImages (key: 'navbar_logo')
+  useEffect(() => {
+    fetch('/api/content')
+      .then(r => r.json())
+      .then(data => {
+        const logo = data?.siteImages?.find(img => img.key === 'navbar_logo')
+        if (logo?.imageUrl) setLogoUrl(logo.imageUrl)
+      })
+      .catch(() => {})
+  }, [])
 
   // Read cart from localStorage
   useEffect(() => {
@@ -367,8 +380,18 @@ export default function Navbar() {
 
         {/* Logo */}
         <Link href="/" className="nb-logo">
-          <span className="nb-logo-main">Ushas Products</span>
-          <span className="nb-logo-sub">Authentic Kerala Products</span>
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt="Ushas Products Logo"
+              style={{ height: '44px', maxWidth: '160px', objectFit: 'contain', display: 'block' }}
+            />
+          ) : (
+            <>
+              <span className="nb-logo-main">Ushas Products</span>
+              <span className="nb-logo-sub">Authentic Kerala Products</span>
+            </>
+          )}
         </Link>
 
         {/* Desktop Links */}
@@ -499,8 +522,18 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Kerala decorative text */}
-        <div className="nb-mobile-decor">Ushas Products</div>
+        {/* Kerala decorative bottom of mobile menu */}
+        <div className="nb-mobile-decor">
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt="Ushas Products Logo"
+              style={{ height: '40px', maxWidth: '140px', objectFit: 'contain', opacity: 0.5, display: 'inline-block' }}
+            />
+          ) : (
+            'Ushas Products'
+          )}
+        </div>
       </div>
     </>
   )
