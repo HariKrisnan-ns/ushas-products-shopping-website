@@ -1,4 +1,5 @@
 'use client'
+import { CATEGORIES } from '@/lib/categories'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 
@@ -35,7 +36,7 @@ export default function HomePage() {
           setTimeout(() => setShowPopup(true), 2500)
         }
       })
-      .catch(() => {})
+      .catch(() => { })
   }, [])
 
   // Auto-advance hero slides
@@ -1084,8 +1085,7 @@ export default function HomePage() {
           <div className="footer-col">
             <h4>Categories</h4>
             <ul>
-              {['Snacks', 'Health Foods', 'Oils & Ghee', 'Traditional', 'Organic'].map(c => (
-                <li key={c}><Link href={`/shop?category=${c}`}>{c}</Link></li>
+              {CATEGORIES.map(c => (<li key={c}><Link href={`/shop?category=${c}`}>{c}</Link></li>
               ))}
             </ul>
           </div>

@@ -1,4 +1,5 @@
 'use client'
+import { CATEGORIES } from '@/lib/categories'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
@@ -541,8 +542,7 @@ export default function ContactPage() {
           <div className="footer-col">
             <h4>Categories</h4>
             <ul>
-              {['Snacks', 'Health Foods', 'Oils & Ghee', 'Traditional', 'Organic'].map(c => (
-                <li key={c}><Link href={`/shop?category=${c}`}>{c}</Link></li>
+              {CATEGORIES.map(c => (<li key={c}><Link href={`/shop?category=${c}`}>{c}</Link></li>
               ))}
             </ul>
           </div>

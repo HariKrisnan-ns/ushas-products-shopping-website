@@ -3,6 +3,7 @@ import { products } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
 import { getOrCreateUser } from '@/lib/getOrCreateUser'
 import { NextResponse } from 'next/server'
+import { CATEGORIES } from '@/lib/categories'
 
 async function isAdmin() {
   const user = await getOrCreateUser()
@@ -20,8 +21,7 @@ function extractProductFields(body) {
   // Basic validation
   if (!name || typeof name !== 'string') throw new Error('Invalid name')
   if (!price || isNaN(Number(price))) throw new Error('Invalid price')
-  if (!category || typeof category !== 'string') throw new Error('Invalid category')
-
+  if (!category || !CATEGORIES.includes(category)) throw new Error('Invalid category')
   return {
     name: String(name).trim(),
     slug: slug ? String(slug).trim() : name.toLowerCase().replace(/\s+/g, '-'),

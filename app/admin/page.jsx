@@ -1,4 +1,5 @@
 'use client'
+import { CATEGORIES } from '@/lib/categories'
 import { useState, useEffect } from 'react'
 import { useUser, SignOutButton } from '@clerk/nextjs'
 import Link from 'next/link'
@@ -472,8 +473,7 @@ export default function AdminPage() {
                     <div className="ad-fg">
                       <label>Category</label>
                       <select value={productForm.category} onChange={e => setProductForm(f => ({ ...f, category: e.target.value }))}>
-                        {['Snacks', 'Health', 'Beverages', 'Traditional'].map(c => <option key={c}>{c}</option>)}
-                      </select>
+                        {CATEGORIES.map(c => <option key={c}>{c}</option>)}                      </select>
                     </div>
                     <div className="ad-fg">
                       <label>Tag</label>

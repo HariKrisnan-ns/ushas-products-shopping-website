@@ -1,4 +1,5 @@
 'use client'
+import { CATEGORIES } from '@/lib/categories'
 import { useState, useEffect } from 'react'
 import { useUser, SignOutButton } from '@clerk/nextjs'
 import Link from 'next/link'
@@ -194,7 +195,8 @@ export default function ProfilePage() {
                     API Error: {apiError}
                   </div>
                   <button
-                    onClick={() => { setApiError(null); setLoading(true);
+                    onClick={() => {
+                      setApiError(null); setLoading(true);
                       fetch('/api/orders').then(r => r.json()).then(d => {
                         if (Array.isArray(d)) setOrders(d)
                         else setApiError(d?.error || 'Unknown error')
@@ -313,8 +315,7 @@ export default function ProfilePage() {
           <div className="footer-col">
             <h4>Categories</h4>
             <ul>
-              {['Snacks', 'Health Foods', 'Oils & Ghee', 'Traditional', 'Organic'].map(c => (
-                <li key={c}><Link href={`/shop?category=${c}`}>{c}</Link></li>
+              {CATEGORIES.map(c => (<li key={c}><Link href={`/shop?category=${c}`}>{c}</Link></li>
               ))}
             </ul>
           </div>
