@@ -353,19 +353,16 @@ export default function AboutPage() {
           <div className="ab-hero-kicker"><span />Our Story</div>
           <h1>Rooted in Kerala's <em>Rich Culinary</em> Heritage</h1>
           <p className="ab-hero-sub">
-            Ushas Products was born from a simple belief — the purest, most wholesome food comes from time-honoured traditions. Since 2018, we've been bringing authentic Kerala snacks and health foods to homes across India.
+            Ushas Products was born from a simple belief — the purest, most wholesome food comes from time-honoured traditions. Since 2021, we've been bringing authentic Kerala snacks and health foods to homes across India.
           </p>
           <div className="ab-hero-stats">
             <div>
-              <div className="ab-stat-num">2018</div>
+              <div className="ab-stat-num">2021</div>
               <div className="ab-stat-label">Founded</div>
             </div>
+
             <div>
-              <div className="ab-stat-num">50+</div>
-              <div className="ab-stat-label">Local Farmers</div>
-            </div>
-            <div>
-              <div className="ab-stat-num">50K+</div>
+              <div className="ab-stat-num">100+</div>
               <div className="ab-stat-label">Happy Customers</div>
             </div>
           </div>
@@ -389,21 +386,18 @@ export default function AboutPage() {
               alt="Making snacks"
               className="ab-story-img"
             />
-            <div className="ab-story-img-badge">
-              <div className="num">50+</div>
-              <div className="lbl">Local Farmers</div>
-            </div>
+
           </div>
           <div className="reveal-right">
             <div className="ab-kicker">Our Journey</div>
-            <h2 className="ab-title">From Grandmother's Kitchen to <span className="gold">Your Doorstep</span></h2>
+            <h2 className="ab-title">From Ushas's Kitchen to <span className="gold">Your Doorstep</span></h2>
             <div className="ab-story-quote">
               "The best food is made with love, from the finest ingredients, for the people you care about."
-              <div style={{ marginTop: 8, fontSize: 13, fontWeight: 800, fontStyle: 'normal', color: 'var(--brown-lt)' }}>— Usha Krishnan, Founder</div>
+              <div style={{ marginTop: 8, fontSize: 13, fontWeight: 800, fontStyle: 'normal', color: 'var(--brown-lt)' }}>— Usha Ramakrishnan, Founder</div>
             </div>
-            <p>It all started in a small kitchen in Thrissur, where our founder Usha Krishnan would spend hours making banana chips and murukku using recipes passed down through generations.</p>
+            <p>It all started in a small kitchen in out home, where our founder Usha  would spend hours making banana chips and murukku using recipes passed down through generations.</p>
             <p>What began as sharing treats with neighbours quickly grew into a mission — to preserve authentic Kerala food traditions and make them accessible to everyone, everywhere.</p>
-            <p>Today, we work with over 50 local farmers and home producers across Kerala, ensuring every product is made with the same love and quality as that very first batch from Usha's kitchen.</p>
+            <p>We are ensuring every product is made with the same love and quality as that very first batch from Usha's kitchen.</p>
             <Link href="/contact" className="ab-btn">Get in Touch →</Link>
           </div>
         </div>
@@ -417,11 +411,10 @@ export default function AboutPage() {
         </div>
         <div className="ab-timeline">
           {[
-            { year: '2018', icon: '🌱', title: 'The Beginning', text: 'Usha Krishnan starts making banana chips and murukku in her Thrissur kitchen, sharing them with neighbours.' },
-            { year: '2019', icon: '🏪', title: 'First Local Store', text: 'Products hit the shelves of local stores in Thrissur. Word spreads fast about the authentic taste.' },
-            { year: '2020', icon: '🌐', title: 'Going Online', text: 'We launch our first online store, bringing Kerala snacks to customers across India during the pandemic.' },
-            { year: '2022', icon: '🤝', title: 'Farmer Network', text: 'We partner with 50+ local farmers and women entrepreneurs, ensuring fair wages and quality sourcing.' },
-            { year: '2024', icon: '🎉', title: '50,000 Customers', text: 'We celebrate 50,000 happy customers and launch our expanded range of health foods and organic products.' },
+            { year: '2020', icon: '🌱', title: 'The Beginning', text: 'Usha Krishnan starts making banana chips and murukku in her Thrissur kitchen, sharing them with neighbours.' },
+            { year: '2021', icon: '🏪', title: 'The idea of Ushas products', text: 'Selling our products in local neighbourhood.' },
+            { year: '2025', icon: '🌐', title: 'Going Online', text: 'We launch our first online store, bringing Kerala snacks to customers across India .' },
+
           ].map((item, i) => (
             <div key={item.year} className={`ab-tl-item reveal d${Math.min(i + 1, 5)}`}>
               <div className="ab-tl-dot">{item.icon}</div>
@@ -445,7 +438,6 @@ export default function AboutPage() {
         <div className="ab-values-grid">
           {[
             ['🌿', 'Authenticity', 'Every recipe is traditional. No shortcuts, no compromises — just real Kerala food made the right way.'],
-            ['🤝', 'Community', 'We partner with local farmers and women entrepreneurs across Kerala, supporting livelihoods.'],
             ['🥥', 'Quality First', 'From sourcing to packaging, quality is at the core of everything we do. Always.'],
             ['🌍', 'Sustainability', 'Eco-friendly packaging and zero food waste practices across our entire supply chain.'],
             ['❤️', 'Passion', 'Made with genuine love by people who care deeply about food, culture and community.'],
@@ -488,7 +480,7 @@ export default function AboutPage() {
       {/* ── CTA ── */}
       <div className="ab-cta reveal">
         <h2>Taste the Difference 🌿</h2>
-        <p>Experience authentic Kerala flavours made with generations of love. Order now and get free delivery on your first order above ₹500.</p>
+        <p>Experience authentic Kerala flavours made with generations of love.</p>
         <div className="ab-cta-btns">
           <Link href="/shop" className="ab-cta-btn-primary">Shop Now →</Link>
           <Link href="/contact" className="ab-cta-btn-ghost">Contact Us</Link>

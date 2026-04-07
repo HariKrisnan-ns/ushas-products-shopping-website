@@ -23,12 +23,18 @@ export async function POST(req) {
   } else if (type === 'featured') {
     ;[result] = await db.insert(featuredProducts).values(data).returning()
   } else if (type === 'siteImage') {
+    if (!data?.imageUrl) {
+      return NextResponse.json({ error: 'imageUrl is required' }, { status: 400 })
+    }
     ;[result] = await db.insert(siteImages)
-      .values(data)
-      .onConflictDoUpdate({ target: siteImages.key, set: { imageUrl: data.imageUrl, updatedAt: new Date() } })
+      .values({ key: data.key, imageUrl: data.imageUrl, label: data.label || data.key, updatedAt: new Date() })
+      .onConflictDoUpdate({
+        target: siteImages.key,
+        set: { imageUrl: data.imageUrl, label: data.label || data.key, updatedAt: new Date() }
+      })
       .returning()
   }
-  return NextResponse.json(result)
+  return NextResponse.json(result ?? { error: 'Unknown type' })
 }
 
 export async function PUT(req) {

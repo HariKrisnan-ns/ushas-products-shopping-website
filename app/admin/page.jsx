@@ -114,8 +114,18 @@ export default function AdminPage() {
   const handleContent = async (type, method, formData, id = null) => {
     const url = '/api/admin/content'
     const body = method === 'DELETE' ? { type, id } : method === 'PUT' ? { type, id, data: formData } : { type, data: formData }
-    await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-    showToast(method === 'DELETE' ? '🗑️ Deleted!' : '✅ Saved!')
+    try {
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      const json = await res.json()
+      if (!res.ok || json?.error) {
+        showToast(`❌ Error: ${json?.error || 'Something went wrong'}`, 'error')
+        return
+      }
+      showToast(method === 'DELETE' ? '🗑️ Deleted!' : '✅ Saved!')
+    } catch (e) {
+      showToast('❌ Network error, please try again', 'error')
+      return
+    }
     fetchData()
   }
 
@@ -1120,8 +1130,11 @@ export default function AdminPage() {
                     />
                   </div>
                   <div className="ad-form-actions">
-                    <button className="ad-btn green" onClick={() => {
-                      handleContent('siteImage', 'POST', { key: siteImageForm.key, imageUrl: siteImageForm.imageUrl, label: siteImageForm.label, updatedAt: new Date() })
+                    <button className="ad-btn green" onClick={async () => {
+                      if (!siteImageForm.imageUrl) {
+                        showToast('❌ Please upload an image first', 'error'); return
+                      }
+                      await handleContent('siteImage', 'POST', { key: siteImageForm.key, imageUrl: siteImageForm.imageUrl, label: siteImageForm.label })
                       setSiteImageForm(f => ({ ...f, imageUrl: '' }))
                     }}>🖼️ Update Image</button>
                   </div>

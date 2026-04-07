@@ -93,9 +93,27 @@ export default function Navbar() {
         /* ── LOGO ── */
         .nb-logo {
           text-decoration: none;
-          display: flex; flex-direction: column; line-height: 1;
+          display: flex; align-items: center;
           z-index: 510; flex-shrink: 0;
-          gap: 1px;
+          transition: opacity 0.2s, transform 0.2s;
+        }
+        .nb-logo:hover { opacity: 0.88; transform: translateY(-1px); }
+        .nb-logo-img {
+          height: 54px;
+          width: auto;
+          max-width: 220px;
+          object-fit: contain;
+          display: block;
+          filter: drop-shadow(0 1px 6px rgba(0,0,0,0.22));
+        }
+        @media (max-width: 1024px) {
+          .nb-logo-img { height: 50px; max-width: 190px; }
+        }
+        @media (max-width: 768px) {
+          .nb-logo-img { height: 44px; max-width: 160px; }
+        }
+        @media (max-width: 480px) {
+          .nb-logo-img { height: 40px; max-width: 140px; }
         }
         .nb-logo-main {
           font-family: 'Tiro Malayalam', serif;
@@ -384,13 +402,13 @@ export default function Navbar() {
             <img
               src={logoUrl}
               alt="Ushas Products Logo"
-              style={{ height: '44px', maxWidth: '160px', objectFit: 'contain', display: 'block' }}
+              className="nb-logo-img"
             />
           ) : (
-            <>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
               <span className="nb-logo-main">Ushas Products</span>
               <span className="nb-logo-sub">Authentic Kerala Products</span>
-            </>
+            </div>
           )}
         </Link>
 
@@ -528,7 +546,7 @@ export default function Navbar() {
             <img
               src={logoUrl}
               alt="Ushas Products Logo"
-              style={{ height: '40px', maxWidth: '140px', objectFit: 'contain', opacity: 0.5, display: 'inline-block' }}
+              style={{ height: '38px', maxWidth: '140px', objectFit: 'contain', display: 'block', margin: '0 auto', opacity: 0.8, filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.3))' }}
             />
           ) : (
             'Ushas Products'
