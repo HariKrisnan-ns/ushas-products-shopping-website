@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { products } from '@/lib/schema'
+import { products, orderItems } from '@/lib/schema'
 import { eq } from 'drizzle-orm'
 import { getOrCreateUser } from '@/lib/getOrCreateUser'
 import { NextResponse } from 'next/server'
@@ -26,8 +26,10 @@ function extractProductFields(body) {
     name: String(name).trim(),
     slug: slug ? String(slug).trim() : name.toLowerCase().replace(/\s+/g, '-'),
     category: String(category).trim(),
-    price: parseInt(price),
-    mrp: mrp ? parseInt(mrp) : parseInt(price),
+    price: Math.round(Number(price)),
+    mrp: (mrp !== undefined && mrp !== null && mrp !== '')
+      ? Math.round(Number(mrp))
+      : Math.round(Number(price)),
     description: description ? String(description).trim() : null,
     imageUrl: imageUrl ? String(imageUrl).trim() : null,
     weight: weight ? String(weight).trim() : null,
@@ -54,13 +56,25 @@ export async function POST(req) {
 }
 
 // PUT — edit product
+// PUT — edit product
 export async function PUT(req) {
   if (!await isAdmin()) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   try {
     const body = await req.json()
-    const { id } = body
+    const { id, inStock } = body
     if (!id) return NextResponse.json({ error: 'Missing product id' }, { status: 400 })
-    const fields = extractProductFields(body) // ✅ only known fields, validated
+
+    // ✅ Partial update — only toggle stock
+    if (Object.keys(body).length === 2 && 'inStock' in body) {
+      const [product] = await db.update(products)
+        .set({ inStock: Boolean(inStock) })
+        .where(eq(products.id, id))
+        .returning()
+      return NextResponse.json(product)
+    }
+
+    // Full update — validate all fields
+    const fields = extractProductFields(body)
     const [product] = await db.update(products).set(fields).where(eq(products.id, id)).returning()
     return NextResponse.json(product)
   } catch (err) {
@@ -74,8 +88,22 @@ export async function DELETE(req) {
   try {
     const { id } = await req.json()
     if (!id) return NextResponse.json({ error: 'Missing product id' }, { status: 400 })
+
+    // Check if product has any orders
+    const ordered = await db.select().from(orderItems).where(eq(orderItems.productId, id))
+
+    if (ordered.length > 0) {
+      // Product has orders — soft delete only
+      await db.update(products)
+        .set({ isDeleted: true, inStock: false })
+        .where(eq(products.id, id))
+      return NextResponse.json({ success: true, softDeleted: true })
+    }
+
+    // No orders — safe to hard delete
     await db.delete(products).where(eq(products.id, id))
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, softDeleted: false })
+
   } catch (err) {
     return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 })
   }

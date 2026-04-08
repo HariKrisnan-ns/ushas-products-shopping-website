@@ -1,6 +1,6 @@
 import { db } from '@/lib/db'
 import { products, productImages } from '@/lib/schema'
-import { ilike, eq, and, inArray } from 'drizzle-orm'
+import { ilike, eq, and, inArray, ne } from 'drizzle-orm'
 import { NextResponse } from 'next/server'
 
 // Helper: attach extra images to each product
@@ -33,23 +33,27 @@ export async function GET(req) {
 
   try {
     let result
+    const notDeleted = ne(products.isDeleted, true)  // ← filters out soft-deleted
 
     if (slug) {
-      result = await db.select().from(products).where(eq(products.slug, slug))
+      result = await db.select().from(products)
+        .where(and(eq(products.slug, slug), notDeleted))
     } else if (category && search) {
       result = await db.select().from(products)
         .where(and(
           eq(products.category, category),
-          ilike(products.name, `%${search}%`)
+          ilike(products.name, `%${search}%`),
+          notDeleted
         ))
     } else if (category) {
       result = await db.select().from(products)
-        .where(eq(products.category, category))
+        .where(and(eq(products.category, category), notDeleted))
     } else if (search) {
       result = await db.select().from(products)
-        .where(ilike(products.name, `%${search}%`))
+        .where(and(ilike(products.name, `%${search}%`), notDeleted))
     } else {
       result = await db.select().from(products)
+        .where(notDeleted)
     }
 
     // ✅ Attach extra images to every product
