@@ -442,8 +442,8 @@ export default function HomePage() {
           transform:translateY(-6px);
         }
 
-        .prod-img-wrap { position:relative; overflow:hidden; height:200px; flex-shrink:0; }
-        .prod-img { width:100%; height:100%; object-fit:cover; transition:transform 0.5s ease; }
+.prod-img-wrap { position:relative; overflow:hidden; height:195px; flex-shrink:0; background:#fff; }
+        .prod-img { width:100%; height:100%; object-fit:contain; transition:transform 0.5s ease; background:#fff; padding:8px; }
         .prod-card:hover .prod-img { transform:scale(1.08); }
 
         .prod-badge {
@@ -810,7 +810,7 @@ export default function HomePage() {
             Soul of Kerala
           </h1>
           <p className="hero-sub">
-            Traditional snacks, cold-pressed oils and timeless recipes —
+            Traditional snacks, oils and timeless recipes —
             handcrafted with generations of love, delivered to your doorstep.
           </p>
           <div className="hero-btns">
@@ -1005,8 +1005,8 @@ export default function HomePage() {
         <div className="why-grid">
           {[
             ['🌿', '100% Natural', 'No artificial colours, flavours or preservatives. Just pure, honest ingredients sourced directly from farmers.'],
-            ['🥥', 'Coconut Oil Fried', 'All snacks are fried in fresh cold-pressed coconut oil for that authentic, unmistakable Kerala taste.'],
-            ['📦', 'Safe Packaging', 'Vacuum-sealed freshness pouches that lock in flavour and ensure longer shelf life and hygiene.'],
+            ['🥥', 'Coconut Oil Fried', 'All snacks are fried in fresh coconut oil for that authentic, unmistakable Kerala taste.'],
+            ['📦', 'Safe Packaging', 'Well packed pouches that lock in flavour and ensure longer shelf life and hygiene.'],
             ['🚚', 'Pan-India Delivery', 'Fast and reliable delivery to your doorstep anywhere in India. Free shipping above ₹500.'],
           ].map(([ic, h, d], i) => (
             <div key={h} className={`why-card reveal d${i + 1}`} id={`why-${i}`} data-animate>
@@ -1100,12 +1100,7 @@ export default function HomePage() {
         </div>
         <div className="footer-bottom">
           <p>© 2026 Ushas Products. All rights reserved. Made with ❤️ in Kerala.</p>
-          <div className="footer-socials">
-            <a href="#" className="footer-social">📘</a>
-            <a href="#" className="footer-social">📸</a>
-            <a href="#" className="footer-social">▶️</a>
-            <a href="#" className="footer-social">🐦</a>
-          </div>
+
         </div>
       </footer>
 

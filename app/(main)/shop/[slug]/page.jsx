@@ -593,7 +593,7 @@ export default function ProductDetailPage() {
             <div className="pd-img-trust">
               {[
                 ['🌿', '100% Natural', 'No additives'],
-                ['📦', 'Vacuum Sealed', 'Stays fresh'],
+                ['📦', 'Well Packed', 'Stays fresh'],
                 ['🚚', 'Fast Delivery', 'Pan India'],
               ].map(([ic, label, sub]) => (
                 <div className="pd-trust-item" key={label}>
@@ -682,7 +682,7 @@ export default function ProductDetailPage() {
             </div>
 
             <div className="pd-badges">
-              {['🌿 Natural', '🥥 Coconut Oil', '📦 Vacuum Sealed', '✅ FSSAI Certified'].map(b => (
+              {['🌿 Natural', '📦 Well Packed', '✅ FSSAI Certified'].map(b => (
                 <span className="pd-info-badge" key={b}>{b}</span>
               ))}
             </div>
@@ -716,9 +716,7 @@ export default function ProductDetailPage() {
               <h4>Why you'll love it</h4>
               <ul>
                 <li>Made using authentic Kerala recipes passed down through generations</li>
-                <li>Fried in fresh cold-pressed coconut oil for that distinct taste</li>
                 <li>No artificial colours, flavours or preservatives</li>
-                <li>Vacuum-sealed for maximum freshness and shelf life</li>
                 <li>Carefully sourced ingredients from local Kerala farmers</li>
               </ul>
             </div>

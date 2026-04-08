@@ -93,9 +93,14 @@ export async function DELETE(req) {
     const ordered = await db.select().from(orderItems).where(eq(orderItems.productId, id))
 
     if (ordered.length > 0) {
-      // Product has orders — soft delete only
+      // Product has orders — soft delete and free up the slug
+      const [existing] = await db.select().from(products).where(eq(products.id, id))
       await db.update(products)
-        .set({ isDeleted: true, inStock: false })
+        .set({ 
+          isDeleted: true, 
+          inStock: false,
+          slug: `${existing.slug}-deleted-${id}`  // ← frees up the original slug
+        })
         .where(eq(products.id, id))
       return NextResponse.json({ success: true, softDeleted: true })
     }

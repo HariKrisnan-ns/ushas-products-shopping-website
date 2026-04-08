@@ -298,8 +298,7 @@ function ShopPage() {
           transform:translateY(-5px);
         }
 
-        .prod-img-wrap { position:relative; overflow:hidden; height:195px; flex-shrink:0; }
-        .prod-img { width:100%; height:100%; object-fit:cover; transition:transform 0.5s ease; }
+        .prod-img { width:100%; height:100%; object-fit:contain; transition:transform 0.5s ease; background:#fff; padding:8px; }
         .prod-card:hover .prod-img { transform:scale(1.08); }
 
         .prod-badge {
