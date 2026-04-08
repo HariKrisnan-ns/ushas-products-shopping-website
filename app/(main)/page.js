@@ -803,7 +803,7 @@ export default function HomePage() {
         <div className="hero-content">
           <div className="hero-eyebrow">
             <span />
-            God's Own Store
+            Ushas Store
           </div>
           <h1>
             Taste the <span className="accent">Authentic</span><br />
@@ -823,7 +823,7 @@ export default function HomePage() {
           </div>
           <div className="hero-stats">
             <div>
-              <div className="hero-stat-num">50K+</div>
+              <div className="hero-stat-num">100+</div>
               <div className="hero-stat-label">Happy Customers</div>
             </div>
             <div>
@@ -847,7 +847,7 @@ export default function HomePage() {
             <div className="hero-float-badge">
               <div className="hero-float-icon">🥥</div>
               <div>
-                <div className="hero-float-title">Cold-Pressed Coconut Oil</div>
+                <div className="hero-float-title">Healthy & Tasty</div>
                 <div className="hero-float-sub">100% Pure · Kerala Sourced</div>
               </div>
             </div>
@@ -876,8 +876,8 @@ export default function HomePage() {
         {[
           ['🌿', '100% Natural', 'No preservatives'],
           ['🥥', 'Made in Kerala', 'Authentic origin'],
-          ['🚚', 'Free Delivery', 'Orders above ₹500'],
-          ['⭐', '4.9 Rating', '50,000+ reviews'],
+          ['🚚', 'Delivery Available', 'All over Kerala'],
+          ['⭐', '4.9 Rating', '100+ happy customers'],
         ].map(([ic, strong, span]) => (
           <div className="trust-item" key={strong}>
             <div className="trust-icon">{ic}</div>

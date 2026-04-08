@@ -394,7 +394,7 @@ export default function AboutPage() {
             <h2 className="ab-title">From Ushas's Kitchen to <span className="gold">Your Doorstep</span></h2>
             <div className="ab-story-quote">
               "The best food is made with love, from the finest ingredients, for the people you care about."
-              <div style={{ marginTop: 8, fontSize: 13, fontWeight: 800, fontStyle: 'normal', color: 'var(--brown-lt)' }}>— Usha Ramakrishnan, Founder</div>
+              <div style={{ marginTop: 8, fontSize: 13, fontWeight: 800, fontStyle: 'normal', color: 'var(--brown-lt)' }}>—  Founder</div>
             </div>
             <p>It all started in a small kitchen in out home, where our founder Usha  would spend hours making banana chips and murukku using recipes passed down through generations.</p>
             <p>What began as sharing treats with neighbours quickly grew into a mission — to preserve authentic Kerala food traditions and make them accessible to everyone, everywhere.</p>

@@ -371,7 +371,7 @@ export default function ContactPage() {
           {/* Contact cards */}
           <div className="ct-cards">
             {[
-              { ic: '📍', h: 'Our Address', d: 'Ushas Products, NH 544, Thrissur\nKerala, India — 680001', link: null },
+              { ic: '📍', h: 'Our Address', d: 'Ushas Products,Peringode,Palakkad,Kerala,India' },
               { ic: '📞', h: 'Phone', d: '+91 8606371530', link: 'tel:+918606371530' },
               { ic: '📧', h: 'Email', d: 'Productsushas@gmail.com', link: 'mailto:Productsushas@gmail.com' },
               { ic: '💬', h: 'WhatsApp', d: 'Chat with us directly on WhatsApp for quick replies.', link: 'https://wa.me/918606371530' },
@@ -514,12 +514,11 @@ export default function ContactPage() {
       {/* ── FIND US ── */}
       <div className="ct-find reveal">
         <div className="ct-find-kicker">Find Us</div>
-        <h2>Visit Our Store</h2>
-        <p>Drop by our store in Thrissur — we'd love to meet you in person!</p>
+
         <div className="ct-map-placeholder">
           <div className="ct-map-icon">📍</div>
-          <div className="ct-map-text">Ushas Products, NH 544, Thrissur</div>
-          <div className="ct-map-sub">Kerala, India — 680001</div>
+          <div className="ct-map-text">Ushas Products,Peringode,Palakkad,Kerala,India</div>
+          <div className="ct-map-sub">Kerala, India — 679535</div>
         </div>
       </div>
 
@@ -529,7 +528,7 @@ export default function ContactPage() {
           <div className="footer-brand">
             <div className="footer-logo">Ushas products</div>
             <div className="footer-logo-sub">Kerala</div>
-            <p>Bringing the authentic taste of Kerala's traditional snacks and health foods to every home across India since 2018.</p>
+            <p>Challenge your taste buds.</p>
           </div>
           <div className="footer-col">
             <h4>Quick Links</h4>
@@ -557,12 +556,7 @@ export default function ContactPage() {
         </div>
         <div className="footer-bottom">
           <p>© 2026 Ushas Products. All rights reserved. Made with ❤️ in Kerala.</p>
-          <div className="footer-socials">
-            <a href="#" className="footer-social">📘</a>
-            <a href="#" className="footer-social">📸</a>
-            <a href="#" className="footer-social">▶️</a>
-            <a href="#" className="footer-social">🐦</a>
-          </div>
+
         </div>
       </footer>
     </>
